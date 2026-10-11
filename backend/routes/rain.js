@@ -44,7 +44,7 @@ router.get('/rain/:state', async (req, res) => {
       params: {
         latitude:  coord.lat,
         longitude: coord.lon,
-        daily:     'precipitation_probability_max,precipitation_sum,weathercode,temperature_2m_max,temperature_2m_min',
+        daily:     'precipitation_probability_max,precipitation_sum,weather_code,temperature_2m_max,temperature_2m_min',
         timezone:  'Asia/Kolkata',
         forecast_days: 3,
       },
@@ -52,7 +52,7 @@ router.get('/rain/:state', async (req, res) => {
     });
 
     const d = data.daily;
-    const wmo1 = WMO[d.weathercode[1]] || ['Unknown', '🌡️'];
+    const wmo1 = WMO[d.weather_code[1]] || ['Unknown', '🌡️'];
 
     res.json({
       state,
@@ -69,7 +69,7 @@ router.get('/rain/:state', async (req, res) => {
         rain_probability:d.precipitation_probability_max[i],
         rain_mm:         d.precipitation_sum[i],
         temp_max:        d.temperature_2m_max[i],
-        weather_emoji:   (WMO[d.weathercode[i]] || ['', '🌡️'])[1],
+        weather_emoji:   (WMO[d.weather_code[i]] || ['', '🌡️'])[1],
       })),
     });
   } catch (e) {
