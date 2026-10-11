@@ -1,5 +1,8 @@
 const router = require('express').Router();
 const axios  = require('axios');
+// Cache successful weather responses for 10 minutes
+const rainCache = new Map();
+const CACHE_TTL_MS = 10 * 60 * 1000;
 
 const STATES = {
   Punjab:    { lat: 30.9, lon: 75.8 },
@@ -39,6 +42,13 @@ router.get('/rain/:state', async (req, res) => {
   if (!coord)
     return res.status(400).json({ error: `Unknown state "${state}". Choose from: ${Object.keys(STATES).join(', ')}` });
 
+  // Reuse cached weather instead of calling Open-Meteo repeatedly
+  const cached = rainCache.get(state);
+
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    return res.json(cached.data);
+  }
+
   try {
     const { data } = await axios.get('https://api.open-meteo.com/v1/forecast', {
       params: {
@@ -54,7 +64,7 @@ router.get('/rain/:state', async (req, res) => {
     const d = data.daily;
     const wmo1 = WMO[d.weather_code[1]] || ['Unknown', '🌡️'];
 
-    res.json({
+    const result = {
       state,
       date:            d.time[1],
       rain_probability:d.precipitation_probability_max[1],   // % for tomorrow
@@ -71,7 +81,14 @@ router.get('/rain/:state', async (req, res) => {
         temp_max:        d.temperature_2m_max[i],
         weather_emoji:   (WMO[d.weather_code[i]] || ['', '🌡️'])[1],
       })),
+    };
+
+    rainCache.set(state, {
+      data: result,
+      cachedAt: Date.now()
     });
+
+    return res.json(result);
   } catch (e) {
     res.status(502).json({ error: 'Open-Meteo API error', detail: e.message });
   }
