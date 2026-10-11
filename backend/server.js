@@ -14,7 +14,7 @@ app.use(express.json());
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/irricast';
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.warn('⚠️   MongoDB unavailable (prediction history disabled).\n    ', err.message));
 
 // ── Routes ───────────────────────────────────────────────────────────────────
