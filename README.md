@@ -47,6 +47,7 @@ python predict.py Punjab rice
 ```
 
 Should print something like:
+
 ```
 {'state': 'Punjab', 'crop': 'rice', 'predicted_iwr_mm': 3.2,
  'as_of_date': '2026-08-14', 'water_saved_pct_vs_traditional': 68.0}
